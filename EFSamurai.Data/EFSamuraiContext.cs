@@ -11,7 +11,7 @@ namespace EFSamurai
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(
-                @"Server = (localdb)\MSSQLLocalDB" +
+                @"Server = (localdb)\MSSQLLocalDB; " +
                 @"Database = EFSamurai; " +
                 @"Trusted_Connection = True; ");
         }
