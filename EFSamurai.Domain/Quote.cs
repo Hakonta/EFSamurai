@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
-namespace EFSamurai.Domain
+namespace EFSamurai
 {
-    class Quote
+    public class Quote
     {
         public int Id { get; set; }
         public string Text { get; set; }

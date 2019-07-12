@@ -1,4 +1,4 @@
-﻿namespace EFSamurai.Domain
+﻿namespace EFSamurai
 {
     public enum QuoteStyle
     {
