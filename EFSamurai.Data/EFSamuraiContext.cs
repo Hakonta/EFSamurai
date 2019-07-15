@@ -8,6 +8,7 @@ namespace EFSamurai
     {
         public DbSet<Samurai> Samurais { get; set; }
         public DbSet<Quote> Quotes { get; set; }
+        public DbSet<Battle> Battles { get; set; }
         public DbSet<SecretIdentity> SecretIdentities { get; set; }
         public DbSet<SamuraiBattle> SamuraiBattles { get; set; }
         public DbSet<BattleLog> BattleLogs { get; set; }
