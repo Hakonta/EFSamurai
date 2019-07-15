@@ -11,7 +11,7 @@ namespace EFSamurai
         public string Text { get; set; }
         public QuoteStyle? Quality { get; set; }
         [ForeignKey("Samurai")]
-        public int SamuraiID { get; set; }
+        public int SamuraiId { get; set; }
         public Samurai  Samurai { get; set; }
     }
 }

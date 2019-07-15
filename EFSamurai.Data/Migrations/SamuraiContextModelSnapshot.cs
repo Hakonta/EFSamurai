@@ -87,13 +87,13 @@ namespace EFSamurai.Data.Migrations
 
                     b.Property<int?>("Quality");
 
-                    b.Property<int>("SamuraiID");
+                    b.Property<int>("SamuraiId");
 
                     b.Property<string>("Text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SamuraiID");
+                    b.HasIndex("SamuraiId");
 
                     b.ToTable("Quotes");
                 });
@@ -164,13 +164,13 @@ namespace EFSamurai.Data.Migrations
                 {
                     b.HasOne("EFSamurai.Samurai", "Samurai")
                         .WithMany()
-                        .HasForeignKey("SamuraiID")
+                        .HasForeignKey("SamuraiId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("EFSamurai.SamuraiBattle", b =>
                 {
-                    b.HasOne("EFSamurai.Battle", "battle")
+                    b.HasOne("EFSamurai.Battle", "Battle")
                         .WithMany()
                         .HasForeignKey("BattleID")
                         .OnDelete(DeleteBehavior.Cascade);

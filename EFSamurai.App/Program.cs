@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace EFSamurai
 {
@@ -8,10 +9,23 @@ namespace EFSamurai
     {
         static void Main(string[] args)
         {
-            AddOneSamurai("Zelda");
-            AddSomeSamurais("Leonardo", "Donatello", "Michelangelo");
-            AddSomeBattles();
-            AddOneSamuraiWithRelatedData();
+            // AddOneSamurai("Zelda");
+            //AddSomeSamurais("Leonardo", "Donatello", "Michelangelo");
+            //AddSomeBattles();
+            // AddOneSamuraiWithRelatedData();
+            // ClearDatabase();
+        }
+
+        private static void ClearDatabase() // Clearing all the related entities
+        {
+
+            using (var context = new SamuraiContext())
+            {
+                context.RemoveRange(context.Samurais);
+                context.RemoveRange(context.Battles);
+
+                context.SaveChanges();
+            }
         }
 
         private static void AddOneSamuraiWithRelatedData()
@@ -19,25 +33,65 @@ namespace EFSamurai
             var Samurai = new Samurai()
             {
                 Name = "Splinter", Hair = Hairstyle.Oicho,
-                SecretIdentity = new SecretIdentity() {RealName = "Haakon"}
+                SecretIdentity = new SecretIdentity() {RealName = "Haakon"},
+                Quotes = new List<Quote>()
+                {
+                    new Quote()
+                    {
+                        Quality = QuoteStyle.Cheesy,
+                        Text = "You can always die. It's living that takes real courage."
+                    }
+                },
+                SamuraiBattles = new List<SamuraiBattle>()
+                {
+                    new SamuraiBattle()
+                    {
+                        Battle = new Battle()
+                        {
+                            Name = "Battle of EndAll",
+                            Description = "A battle to end all battles.",
+                            BattleLog = new BattleLog()
+                            {
+                                Name = "EndAll",
+                                BattleEvents = new List<BattleEvent>()
+                                {
+                                    new BattleEvent()
+                                    {
+                                        Order = 3,
+                                        Description = "A fierce battle to decide the true owners of the district Alphadia.",
+                                        Summary = "The Skaven clan won the battle and was claimed as the true rulors of Alphadia."
+                                    }
+                                }
+                            }
+                        },
+                        
+                    }
+                }
+
             };
+            using (var context = new SamuraiContext())
+            {
+                context.Samurais.Add(Samurai);
+                context.SaveChanges();
+            }
+
         }
 
         private static void AddSomeBattles() // Test method
         {
             IList<Battle> newBattles = new List<Battle>()
             {
-                new Battle() {Name = "The big clash!", Description = "A long and tough battle!",
+                new Battle() {Name = "The big clash!", Description = "A long and tough Battle!",
                     BattleLog = new BattleLog(){Name = "TheToughAndLongBattle", 
                         BattleEvents = new List<BattleEvent>()
                         {
                             new BattleEvent(){Order = 1,
-                                Description = "It was a long battle, it was also tough.",
+                                Description = "It was a long Battle, it was also tough.",
                                 Summary = "The samurais won!"}}
                         }},
                 new Battle()
                 {
-                    Name = "The battle of 1000 samurais", Description = "A battle to end it all.",
+                    Name = "The Battle of 1000 samurais", Description = "A Battle to end it all.",
                     BattleLog = new BattleLog()
                     {
                         Name = "1000 Samurais",

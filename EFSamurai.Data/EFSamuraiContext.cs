@@ -26,5 +26,7 @@ namespace EFSamurai
                 @"Database = EFSamurai; " +
                 @"Trusted_Connection = True; ");
         }
+
+
     }
 }

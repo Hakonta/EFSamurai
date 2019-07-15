@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EFSamurai.Data.Migrations
 {
     [DbContext(typeof(SamuraiContext))]
-    [Migration("20190712142015_CreateEFSamurai6")]
-    partial class CreateEFSamurai6
+    [Migration("20190715095435_EFSamurai9")]
+    partial class EFSamurai9
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -39,7 +39,46 @@ namespace EFSamurai.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Battle");
+                    b.ToTable("Battles");
+                });
+
+            modelBuilder.Entity("EFSamurai.BattleEvent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("BattleLogId");
+
+                    b.Property<string>("Description");
+
+                    b.Property<int>("Order");
+
+                    b.Property<string>("Summary");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BattleLogId");
+
+                    b.ToTable("BattleEvents");
+                });
+
+            modelBuilder.Entity("EFSamurai.BattleLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("BattleId");
+
+                    b.Property<string>("Name");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BattleId")
+                        .IsUnique();
+
+                    b.ToTable("BattleLogs");
                 });
 
             modelBuilder.Entity("EFSamurai.Quote", b =>
@@ -50,13 +89,13 @@ namespace EFSamurai.Data.Migrations
 
                     b.Property<int?>("Quality");
 
-                    b.Property<int>("SamuraiID");
+                    b.Property<int>("SamuraiId");
 
                     b.Property<string>("Text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SamuraiID");
+                    b.HasIndex("SamuraiId");
 
                     b.ToTable("Quotes");
                 });
@@ -107,11 +146,27 @@ namespace EFSamurai.Data.Migrations
                     b.ToTable("SecretIdentities");
                 });
 
+            modelBuilder.Entity("EFSamurai.BattleEvent", b =>
+                {
+                    b.HasOne("EFSamurai.BattleLog", "BattleLog")
+                        .WithMany("BattleEvents")
+                        .HasForeignKey("BattleLogId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("EFSamurai.BattleLog", b =>
+                {
+                    b.HasOne("EFSamurai.Battle", "Battle")
+                        .WithOne("BattleLog")
+                        .HasForeignKey("EFSamurai.BattleLog", "BattleId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("EFSamurai.Quote", b =>
                 {
                     b.HasOne("EFSamurai.Samurai", "Samurai")
                         .WithMany()
-                        .HasForeignKey("SamuraiID")
+                        .HasForeignKey("SamuraiId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

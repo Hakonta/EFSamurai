@@ -10,6 +10,6 @@ namespace EFSamurai
         public Samurai Samurai { get; set; }
 
         public int BattleID { get; set; }
-        public Battle battle { get; set; }
+        public Battle Battle { get; set; }
     }
 }

@@ -172,7 +172,7 @@ namespace EFSamurai.Data.Migrations
 
             modelBuilder.Entity("EFSamurai.SamuraiBattle", b =>
                 {
-                    b.HasOne("EFSamurai.Battle", "battle")
+                    b.HasOne("EFSamurai.Battle", "Battle")
                         .WithMany()
                         .HasForeignKey("BattleID")
                         .OnDelete(DeleteBehavior.Cascade);
