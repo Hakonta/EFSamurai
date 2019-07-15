@@ -12,7 +12,10 @@ namespace EFSamurai
         public bool IsBrutal { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        
+        // Mirrored
         private ICollection<SamuraiBattle> SamuraiBattles { get; set; }
-
+        // Mirrored
+        public BattleLog BattleLog { get; set; }
     }
 }
