@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace EFSamurai
 {
@@ -9,11 +10,103 @@ namespace EFSamurai
     {
         static void Main(string[] args)
         {
-            // AddOneSamurai("Zelda");
+            //AddOneSamurai("Zelda");
             //AddSomeSamurais("Leonardo", "Donatello", "Michelangelo");
             //AddSomeBattles();
-            // AddOneSamuraiWithRelatedData();
+            //AddOneSamuraiWithRelatedData();
             // ClearDatabase();
+            // ListAllSamuraiNames();
+            // ListAllSamuraiNames_OrderByDescending();
+            // FindSamurainWithRealName("Splinter");
+            // ListQuoteAndSamurai(QuoteStyle.Cheesy);
+            // ListQuoteAndSamurai(QuoteStyle.Cheesy); // Uses join
+        }
+
+        private static void ListAllQuotesOfType(QuoteStyle quoteStyle)
+        {
+            using (var context = new SamuraiContext())
+            {
+                var quotes = from s in context.Quotes
+                    where s.Quality == quoteStyle
+                    select s;
+                foreach (var quote in quotes)
+                {
+                    Console.WriteLine(quote.Text);
+                }
+            }
+        }
+
+        private static void ListQuoteAndSamurai(QuoteStyle quoteStyle)
+        {
+            using (var context = new SamuraiContext())
+            {
+                var quotes = from s in context.Quotes
+                    join Samurai in context.Samurais on s.SamuraiId equals Samurai.Id
+                    where s.Quality.Equals(quoteStyle)
+                    select new {s.Text, Samurai.Name};
+
+                foreach (var quote in quotes)
+                {
+                    Console.WriteLine($"\"{quote.Text}\" is a {quoteStyle} quote by {quote.Name}");
+                }
+            }
+        }
+
+        private static void FindSamurainWithRealName(string name)
+        {
+            using (var context = new SamuraiContext())
+            {
+                var secretNumber = 0;
+                var nameQuery = context.Samurais.Where(s => s.Name == name);
+                if (nameQuery.Count() == 0)
+                {
+                    Console.WriteLine("There's no samurai by that name.");
+                }
+                else
+                {
+                    foreach (var IdNumber in nameQuery)
+                    {
+                        secretNumber = IdNumber.Id;
+                    }
+
+                    var secretName = context.SecretIdentities.Where(s => s.SamuraiID == secretNumber);
+                    foreach (var realName in secretName)
+                    {
+                        Console.WriteLine(name + "'s real name is " + realName.RealName);
+                    }
+                }
+
+            }
+        }
+
+        private static void ListAllSamuraiNames_OrderByDescending()
+        {
+            using (var ctx = new SamuraiContext())
+            {
+                var samurais = from s in ctx.Samurais
+                    orderby s.Id descending
+                    select s;
+                foreach (var samurai in samurais)
+                {
+                    Console.WriteLine(samurai.Id + " " + samurai.Name);
+                }
+            }
+        }
+
+        private static void ListAllSamuraiNames()
+        {
+            using (var ctx = new SamuraiContext())
+            {
+                var samurais = from s in ctx.Samurais
+                               orderby s.Name ascending 
+                               select s.Name;
+                foreach (var samurai in samurais)
+                {
+                    Console.WriteLine(samurai);
+                }
+            }
+
+
         }
 
         private static void ClearDatabase() // Clearing all the related entities
