@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Net.Http.Headers;
+using ConsoleTables.Core;
+using Remotion.Linq.Clauses;
 
 namespace EFSamurai
 {
@@ -20,6 +23,136 @@ namespace EFSamurai
             // FindSamurainWithRealName("Splinter");
             // ListQuoteAndSamurai(QuoteStyle.Cheesy);
             // ListQuoteAndSamurai(QuoteStyle.Cheesy); // Uses join
+            // ListAllBattles(new DateTime(1515 - 01 - 01), new DateTime(1900 - 01 - 01), true);
+            // ListAllBattlesWithinPeriod(new DateTime(1515 - 01 - 01), new DateTime(1900 - 01 - 01), null);
+            // var listOfAliasesAndNames = AllSamurainNamesWithAliases();
+            ListAllBattles_WithLog(new DateTime(1400 - 01 - 1), new DateTime(1900 - 01 - 01), true);
+        }
+
+        private static void ListAllBattles_WithLog(DateTime from, DateTime to, bool isBrutal)
+        {
+            using (var context = new SamuraiContext())
+            {
+                var battlesAndLogs =
+                    from s in context.BattleEvents
+                    join Battle in context.Battles on s.BattleLogId equals Battle.Id
+                    where Battle.IsBrutal == true
+                    select new {s.Summary, Battle.Name};
+
+                foreach (var battle in battlesAndLogs)
+                {
+                    var table = new ConsoleTable("Name of Battle", "Summary");
+                    foreach (var bat in battlesAndLogs)
+                    {
+                        table.AddRow(battle.Name, battle.Summary);
+                    }
+                    Console.WriteLine(table);
+                }
+            }
+
+        }
+
+        private static ICollection<string> AllSamurainNamesWithAliases()
+        {
+            {
+                List<string> listOfSamurais = new List<string>();
+
+                using (var context = new SamuraiContext())
+                {
+                    var samurais =
+                        from s in context.SecretIdentities
+                        join Samurai in context.Samurais on s.SamuraiID equals Samurai.Id
+                        select new {s.RealName, Samurai.Name};
+                    foreach (var name in samurais)
+                    {
+                        listOfSamurais.Add($"{name.RealName} alias {name.Name}");
+                    }
+                }
+                return listOfSamurais;
+            }
+        }
+
+        private static void ListAllBattlesWithinPeriod(DateTime fromTime, DateTime toTime, bool? isBrutal)
+        {
+            using (var context = new SamuraiContext())
+            {
+                var withinPeriod =
+                    from s in context.Battles
+                    where s.EndDate <= toTime && s.StartDate <= toTime
+                    select s;
+                if (withinPeriod.Count() == 0)
+                {
+                    Console.WriteLine("Didn't find any battles within this time period");
+                }
+
+                Console.WriteLine("Found the following battles: ");
+                if (isBrutal == null)
+                    foreach (var battle in withinPeriod)
+                    {
+                        Console.WriteLine(battle.Name);
+                    }
+                else if (isBrutal == true)
+                {
+                    foreach (var battle in withinPeriod)
+                    {
+                        if (battle.IsBrutal)
+                        {
+                            Console.WriteLine(battle.Name);
+                        }
+                    }
+                }
+                else if (isBrutal == false)
+                {
+                    foreach (var battle in withinPeriod)
+                    {
+                        if (battle.IsBrutal == false)
+                        {
+                            Console.WriteLine(battle.Name);
+                        }
+                    }
+                }
+            }
+
+        }
+
+        private static void ListAllBattles(DateTime fromTime, DateTime toTime, bool? IsBrutal)
+        {
+            using (var context = new SamuraiContext())
+            {
+                var withinPeriod = 
+                    from s in context.Battles
+                    where s.EndDate <= toTime && s.StartDate >= toTime
+                    select s;
+                if (withinPeriod.Count() == 0)
+                {
+                    var newQuery =
+                        from s in context.Battles
+                        where s.IsBrutal.Equals(true)
+                        select s;
+                    if (newQuery.Count() == 0)
+                    {
+                        Console.WriteLine("No battles were found.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Found the following battles: ");
+                        foreach (var battle in newQuery)
+                        {
+                            Console.WriteLine(battle.Name);
+                        }
+                    }
+                
+                }
+                else
+                {
+                    Console.WriteLine("Found the following battles: ");
+                    foreach (var battle in withinPeriod)
+                    {
+                        Console.WriteLine(battle.Name);
+                    }
+                }
+            }
+
         }
 
         private static void ListAllQuotesOfType(QuoteStyle quoteStyle)
@@ -175,6 +308,7 @@ namespace EFSamurai
             IList<Battle> newBattles = new List<Battle>()
             {
                 new Battle() {Name = "The big clash!", Description = "A long and tough Battle!",
+                    StartDate = new DateTime(1515-02-02), EndDate = new DateTime(1530-01-01), IsBrutal = true,
                     BattleLog = new BattleLog(){Name = "TheToughAndLongBattle", 
                         BattleEvents = new List<BattleEvent>()
                         {
@@ -184,7 +318,8 @@ namespace EFSamurai
                         }},
                 new Battle()
                 {
-                    Name = "The Battle of 1000 samurais", Description = "A Battle to end it all.",
+                    Name = "The Battle of 1000 samurais", Description = "A Battle to end it all.", IsBrutal = true,
+                    StartDate = new DateTime(1532-01-01), EndDate = new DateTime(1545-01-02),
                     BattleLog = new BattleLog()
                     {
                         Name = "1000 Samurais",

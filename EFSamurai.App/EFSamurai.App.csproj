@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ConsoleTables" Version="1.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\EFSamurai.Data\EFSamurai.Data.csproj" />
     <ProjectReference Include="..\EFSamurai.Domain\EFSamurai.Domain.csproj" />
   </ItemGroup>
