@@ -25,7 +25,9 @@ namespace EFSamurai
                 @"Server = (localdb)\MSSQLLocalDB; " +
                 @"Database = EFSamurai; " +
                 @"Trusted_Connection = True; ");
+            optionsBuilder.EnableSensitiveDataLogging();
         }
+
 
 
     }

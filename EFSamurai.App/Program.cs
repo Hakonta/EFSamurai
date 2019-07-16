@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Net.Http.Headers;
 using ConsoleTables.Core;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Logging;
 using Remotion.Linq.Clauses;
 
 namespace EFSamurai
@@ -13,6 +15,8 @@ namespace EFSamurai
     {
         static void Main(string[] args)
         {
+            using (var context = new SamuraiContext())
+                context.GetService<ILoggerFactory>().AddProvider(new MyLoggerProvider());
             //AddOneSamurai("Zelda");
             //AddSomeSamurais("Leonardo", "Donatello", "Michelangelo");
             //AddSomeBattles();
@@ -29,9 +33,47 @@ namespace EFSamurai
             // ListAllBattles_WithLog(new DateTime(1400 - 01 - 1), new DateTime(1900 - 01 - 01), true);
             // FindSamuraiWithRealName_WithDifferentQuery("Splinter"); // Join/Include with Entity Queries
             // ListAllSamuraiNames_WithLinq();
-             //var listOfSamuraiInfo = GetSamuraiInfo();
-             //PrintSamuraiInfo(listOfSamuraiInfo);
+            //var listOfSamuraiInfo = GetSamuraiInfo();
+            //PrintSamuraiInfo(listOfSamuraiInfo);
+            // ListAllBattlesWithLog_WithQuery(new DateTime(1400 - 01 - 1), new DateTime(1900 - 01 - 01), true);
+            // GetBattlesForSamurai("Splinter");
 
+        }
+
+        private static void GetBattlesForSamurai(string samuraiName)
+        {
+            using (var context = new SamuraiContext())
+            {
+                var battles =
+                    context.SamuraiBattles
+                        .Include(b => b.Battle)
+                        .ToList();
+                Console.WriteLine($"Samurai {samuraiName} has participated in the following battles: ");
+                Console.WriteLine("\tID: \tBattlename:");
+                foreach (var battle in battles)
+                {
+                    Console.WriteLine($"\t{battle.BattleID} \t{battle.Battle.Name}");
+                }
+            }
+
+        }
+
+        private static void ListAllBattlesWithLog_WithQuery(DateTime from, DateTime to, bool isBrutal)
+        {
+            using (var context = new SamuraiContext())
+            {
+                var battlesAndLogs = context.BattleEvents
+                    .Include(s => s.BattleLog)
+                    .ThenInclude(b => b.Battle)
+                    .ToList();
+                var table = new ConsoleTable("Name of Battle", "Description", "Summary");
+
+                foreach (var battle in battlesAndLogs)
+                {
+                    table.AddRow(battle.BattleLog.Battle.Name, battle.Description, battle.Summary);
+                }
+                Console.WriteLine(table);
+            }
         }
 
         private static void PrintSamuraiInfo(ICollection<SamuraiInfo> listOfSamurais)
@@ -232,12 +274,20 @@ namespace EFSamurai
                 var samuraiIdentities =
                     context.Samurais
                         .Include(s => s.SecretIdentity)
-                        .Where(n => n.Name.Contains(name))
+                        .Where(n => n.Name.Equals(name))
                         .ToList();
-                foreach (var samurai in samuraiIdentities)
+                if (samuraiIdentities.Count() == 0)
                 {
-                    Console.WriteLine($"{samurai.Name}'s real name is {samurai.SecretIdentity.RealName}");
+                    Console.WriteLine("Couldn't find any samurais by that name.");
                 }
+                else
+                {
+                    foreach (var samurai in samuraiIdentities)
+                    {
+                        Console.WriteLine($"{samurai.Name}'s real name is {samurai.SecretIdentity.RealName}");
+                    }
+                }
+
             }
         }
 
@@ -366,6 +416,32 @@ namespace EFSamurai
                             }
                         },
                         
+                    },
+                    new SamuraiBattle()
+                    {
+                        Battle = new Battle()
+                        {
+                            Name = "Final Fight",
+                            Description = "The REAL battle to end it all",
+                            BattleLog = new BattleLog()
+                            {
+                                BattleEvents = new List<BattleEvent>()
+                                {
+                                    new BattleEvent()
+                                    {
+                                        Order = 4,
+                                        Description = "The final battle to end all battles. Really...",
+                                        Summary = "The battle ended in a deadlock. There were no victors."
+                                    },
+                                    new BattleEvent()
+                                    {
+                                        Order = 5,
+                                        Description = "Somehow the Samurais emerged from nothing and fought back!",
+                                        Summary = "The Samurais won!"
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
