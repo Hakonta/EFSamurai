@@ -26,7 +26,49 @@ namespace EFSamurai
             // ListAllBattles(new DateTime(1515 - 01 - 01), new DateTime(1900 - 01 - 01), true);
             // ListAllBattlesWithinPeriod(new DateTime(1515 - 01 - 01), new DateTime(1900 - 01 - 01), null);
             // var listOfAliasesAndNames = AllSamurainNamesWithAliases();
-            ListAllBattles_WithLog(new DateTime(1400 - 01 - 1), new DateTime(1900 - 01 - 01), true);
+            // ListAllBattles_WithLog(new DateTime(1400 - 01 - 1), new DateTime(1900 - 01 - 01), true);
+            // FindSamuraiWithRealName_WithDifferentQuery("Splinter"); // Join/Include with Entity Queries
+            // ListAllSamuraiNames_WithLinq();
+             //var listOfSamuraiInfo = GetSamuraiInfo();
+             //PrintSamuraiInfo(listOfSamuraiInfo);
+
+        }
+
+        private static void PrintSamuraiInfo(ICollection<SamuraiInfo> listOfSamurais)
+        {
+            var table = new ConsoleTable("Name", "RealName", "Battles");
+
+            foreach (var samurai in listOfSamurais)
+            {
+                table.AddRow(samurai.Name, samurai.RealName, samurai.BattleNames);
+            }
+            Console.WriteLine(table);
+        }
+
+        private static ICollection<SamuraiInfo> GetSamuraiInfo()
+        {
+            List<SamuraiInfo> listOfSamuraiInfo = new List<SamuraiInfo>();
+
+            using (var context = new SamuraiContext())
+            {
+                var samuraisInformation =
+                    context.SamuraiBattles
+                        .Include(sb => sb.Samurai)
+                        .ThenInclude(s => s.SecretIdentity)
+                        .Include(b => b.Battle)
+                        .ToList();
+                foreach (var s in samuraisInformation)
+                {
+                    SamuraiInfo samuraiInfo = new SamuraiInfo();
+                    samuraiInfo.Name = s.Samurai.Name;
+                    samuraiInfo.RealName = s.Samurai.SecretIdentity.RealName;
+                    samuraiInfo.BattleNames = s.Battle.Name;
+                    listOfSamuraiInfo.Add(samuraiInfo);
+                }
+            }
+
+            return listOfSamuraiInfo;
+
         }
 
         private static void ListAllBattles_WithLog(DateTime from, DateTime to, bool isBrutal)
@@ -36,18 +78,16 @@ namespace EFSamurai
                 var battlesAndLogs =
                     from s in context.BattleEvents
                     join Battle in context.Battles on s.BattleLogId equals Battle.Id
-                    where Battle.IsBrutal == true
+                    where Battle.IsBrutal == isBrutal
                     select new {s.Summary, Battle.Name};
+                var table = new ConsoleTable("Name of Battle", "Summary");
 
                 foreach (var battle in battlesAndLogs)
                 {
-                    var table = new ConsoleTable("Name of Battle", "Summary");
-                    foreach (var bat in battlesAndLogs)
-                    {
-                        table.AddRow(battle.Name, battle.Summary);
-                    }
-                    Console.WriteLine(table);
+                    table.AddRow(battle.Name, battle.Summary);
                 }
+                Console.WriteLine(table);
+
             }
 
         }
@@ -185,6 +225,22 @@ namespace EFSamurai
             }
         }
 
+        private static void FindSamuraiWithRealName_WithDifferentQuery(string name)
+        {
+            using (var context = new SamuraiContext())
+            {
+                var samuraiIdentities =
+                    context.Samurais
+                        .Include(s => s.SecretIdentity)
+                        .Where(n => n.Name.Contains(name))
+                        .ToList();
+                foreach (var samurai in samuraiIdentities)
+                {
+                    Console.WriteLine($"{samurai.Name}'s real name is {samurai.SecretIdentity.RealName}");
+                }
+            }
+        }
+
         private static void FindSamurainWithRealName(string name)
         {
             using (var context = new SamuraiContext())
@@ -211,6 +267,25 @@ namespace EFSamurai
 
             }
         }
+
+        private static void ListAllSamuraiNames_WithLinq()
+        {
+            using (var context = new SamuraiContext())
+            {
+                var listOfSamurais =
+                    context.Samurais
+                        //.OrderByDescending(s => s.Name)
+                        .OrderBy(s => s.Name) // Alfabetisk
+                        .ToList();
+                foreach (var name in listOfSamurais)
+                {
+                    Console.WriteLine(name.Name);
+                }
+            }
+
+
+        }
+
 
         private static void ListAllSamuraiNames_OrderByDescending()
         {
