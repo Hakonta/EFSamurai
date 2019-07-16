@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Transactions;
 using ConsoleTables.Core;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
@@ -37,6 +38,7 @@ namespace EFSamurai
             //PrintSamuraiInfo(listOfSamuraiInfo);
             // ListAllBattlesWithLog_WithQuery(new DateTime(1400 - 01 - 1), new DateTime(1900 - 01 - 01), true);
             // GetBattlesForSamurai("Splinter");
+            // var listOfSamurais = AllSammuraiNamesWithAliases_Linq();
 
         }
 
@@ -134,6 +136,26 @@ namespace EFSamurai
 
         }
 
+        private static ICollection<string> AllSammuraiNamesWithAliases_Linq()
+        {
+            List<string>listOfSamurais = new List<string>();
+            using (var context = new SamuraiContext())
+            {
+                var samurais =
+                    context.Samurais
+                        .Include(s => s.SecretIdentity)
+                        .Where(s => s.SecretIdentity.RealName != null)
+                        .ToList();
+
+                foreach (var samurai in samurais)
+                {
+                    listOfSamurais.Add($"{samurai.SecretIdentity.RealName} alias {samurai.Name}");
+                }
+            }
+
+            return listOfSamurais;
+        }
+
         private static ICollection<string> AllSamurainNamesWithAliases()
         {
             {
@@ -160,7 +182,7 @@ namespace EFSamurai
             {
                 var withinPeriod =
                     from s in context.Battles
-                    where s.EndDate <= toTime && s.StartDate <= toTime
+                    where s.EndDate >= fromTime && s.StartDate <= toTime
                     select s;
                 if (withinPeriod.Count() == 0)
                 {
@@ -401,6 +423,7 @@ namespace EFSamurai
                         {
                             Name = "Battle of EndAll",
                             Description = "A battle to end all battles.",
+                            StartDate = new DateTime(1548-02-02), EndDate = new DateTime(1550-01-01), IsBrutal = true,
                             BattleLog = new BattleLog()
                             {
                                 Name = "EndAll",
@@ -423,6 +446,7 @@ namespace EFSamurai
                         {
                             Name = "Final Fight",
                             Description = "The REAL battle to end it all",
+                            StartDate = new DateTime(1550-02-02), EndDate = new DateTime(1560-01-01), IsBrutal = true,
                             BattleLog = new BattleLog()
                             {
                                 BattleEvents = new List<BattleEvent>()
