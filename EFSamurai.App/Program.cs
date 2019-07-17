@@ -29,7 +29,7 @@ namespace EFSamurai
             // ListQuoteAndSamurai(QuoteStyle.Cheesy);
             // ListQuoteAndSamurai(QuoteStyle.Cheesy); // Uses join
             // ListAllBattles(new DateTime(1515 - 01 - 01), new DateTime(1900 - 01 - 01), true);
-            // ListAllBattlesWithinPeriod(new DateTime(1515 - 01 - 01), new DateTime(1900 - 01 - 01), null);
+             // ListAllBattlesWithinPeriod(new DateTime(1515 - 01 - 01), new DateTime(1900 - 01 - 01), null);
             // var listOfAliasesAndNames = AllSamurainNamesWithAliases();
             // ListAllBattles_WithLog(new DateTime(1400 - 01 - 1), new DateTime(1900 - 01 - 01), true);
             // FindSamuraiWithRealName_WithDifferentQuery("Splinter"); // Join/Include with Entity Queries
@@ -39,7 +39,9 @@ namespace EFSamurai
             // ListAllBattlesWithLog_WithQuery(new DateTime(1400 - 01 - 1), new DateTime(1900 - 01 - 01), true);
             // GetBattlesForSamurai("Splinter");
             // var listOfSamurais = AllSammuraiNamesWithAliases_Linq();
-
+            int testNumber = EfMethods.AddOneSamurai("Zelda");
+            Console.WriteLine(testNumber);
+            EfMethods.UpdateSamuraiSetSecretIdentity(testNumber, "Ganon");
         }
 
         private static void GetBattlesForSamurai(string samuraiName)
@@ -99,7 +101,7 @@ namespace EFSamurai
                     context.SamuraiBattles
                         .Include(sb => sb.Samurai)
                         .ThenInclude(s => s.SecretIdentity)
-                        .Include(b => b.Battle)
+                        .Include(sb => sb.Battle)
                         .ToList();
                 foreach (var s in samuraisInformation)
                 {
