@@ -39,9 +39,7 @@ namespace EFSamurai
             // ListAllBattlesWithLog_WithQuery(new DateTime(1400 - 01 - 1), new DateTime(1900 - 01 - 01), true);
             // GetBattlesForSamurai("Splinter");
             // var listOfSamurais = AllSammuraiNamesWithAliases_Linq();
-            int testNumber = EfMethods.AddOneSamurai("Zelda");
-            Console.WriteLine(testNumber);
-            EfMethods.UpdateSamuraiSetSecretIdentity(testNumber, "Ganon");
+
         }
 
         private static void GetBattlesForSamurai(string samuraiName)

@@ -3,28 +3,47 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.Expressions;
 
 namespace EFSamurai
 {
     public static class EfMethods
     {
+
+        public static string ListAllBattlesWithinPeriod(DateTime fromTime, DateTime toTime, bool? isBrutal)
+        {
+            using (var context = new SamuraiContext())
+            {
+                var withinPeriod = context.SamuraiBattles
+                    .Include(sb => sb.Samurai)
+                    .ThenInclude(s => s.SecretIdentity)
+                    .Include(sb => sb.Battle)
+                    .Where(s => s.Battle.EndDate >= fromTime && s.Battle.StartDate <= toTime);
+
+                foreach (var s in withinPeriod)
+                {
+                    return $"{s.Samurai.Name} alias {s.Samurai.SecretIdentity.RealName} fought in {s.Battle.Name}";
+                }
+
+                return null;
+            }
+
+
+
+        }
+
         public static Samurai GetSamurai(int samuraiId)
         {
 
             using (var context = new SamuraiContext())
             {
-                var samurai = context.Samurais
+                return context.Samurais
                     .Include(s => s.SecretIdentity)
-                    .Where(s => s.Id == samuraiId);
-                foreach (var s in samurai)
-                {
-                    return s;
-                }
+                    .First(s => s.Id == samuraiId); // .First makes this into [Samurai]
             }
-
-            return null;
         }
-         public static void UpdateSamuraiSetSecretIdentity(int samuraiId, string name)
+
+        public static void UpdateSamuraiSetSecretIdentity(int samuraiId, string name)
         {
             using (var context = new SamuraiContext())
             {
@@ -34,7 +53,6 @@ namespace EFSamurai
                     .ToList();
                 foreach (var s in samurai)
                 {
-                    Console.WriteLine(s.Name);
                     s.SecretIdentity = new SecretIdentity();
                     s.SecretIdentity.RealName = name;
                         context.Samurais.Update(s);
